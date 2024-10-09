@@ -49,7 +49,7 @@ jobs:
 # Restart the application; if it fails, start it
         pm2 restart myapp || pm2 start npm --name "myapp" -- start
 
-# Optional: Print a success message
+# Optional: Print a success 
         echo "Application restarted successfully."
         EOF
 
