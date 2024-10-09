@@ -43,18 +43,7 @@ jobs:
     - name: Restart application
       run: |
         ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} << 'EOF'
-# Navigate to the application directory
-        cd /var/www/myapp/ || exit 1  # Exit if cd fails
-
-# Restart the application; if it fails, start it
-        pm2 restart myapp || pm2 start npm --name "myapp" -- start
-
-# Optional: Print a success 
-        echo "Application restarted successfully."
+          # Commands to restart your application
+          cd /var/www/myapp/
+          pm2 restart myapp || pm2 start npm --name "myapp" -- start
         EOF
-
-        # ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} << 'EOF'
-        #   # Commands to restart your application
-        #   cd /var/www/myapp/
-        #   pm2 restart myapp || pm2 start npm --name "myapp" -- start
-        # EOF
