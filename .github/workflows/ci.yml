@@ -40,10 +40,10 @@ jobs:
         source: ./dist/
         target: /var/www/myapp/ # Path on your VM
 
-    - name: Restart application
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} << 'EOF'
-          # Commands to restart your application
-          cd /var/www/myapp/
-          pm2 restart myapp || pm2 start npm --name "myapp" -- start
-        EOF
+    # - name: Restart application
+    #   run: |
+    #     ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} << 'EOF'
+    #       # Commands to restart your application
+    #       cd /var/www/myapp/
+    #       pm2 restart myapp || pm2 start npm --name "myapp" -- start
+    #     EOF
