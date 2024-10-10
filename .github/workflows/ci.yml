@@ -18,24 +18,28 @@ jobs:
         npm install
         npm run build
 
-    # Create the .ssh directory and store the SSH key in a file
+    # Set up SSH key
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
 
+    # Clean target directory on VM
     - name: Clean target directory on VM
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo rm -rf /var/www/myapp/dist'
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo rm -rf /var/www/myapp/dist/*'
 
+    # Copy files to VM using rsync
     - name: Copy files to VM using rsync
       run: |
         rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key" ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }}:/var/www/myapp/dist/
     
+    # Restart Nginx on VM
     - name: Restart Nginx on VM
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo systemctl restart nginx'
+
 
 
 
