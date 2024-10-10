@@ -27,7 +27,7 @@ jobs:
 
     - name: Clean target directory on VM
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'rm -rf /var/www/myapp/dist'
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo rm -rf /var/www/myapp/dist'
 
     - name: Copy files to VM using rsync
       run: |
@@ -36,6 +36,7 @@ jobs:
     - name: Restart Nginx on VM
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo systemctl restart nginx'
+
 
 
 
