@@ -18,35 +18,24 @@ jobs:
         npm install
         npm run build
 
-    - name: Clean target directory on VM (optional step)
+    # Store the SSH key in a file
+    - name: Set up SSH key
       run: |
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'rm -rf /var/www/myapp/dist'
-      
-    - name: Copy files to VM using rsync (recommended)
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+
+    - name: Clean target directory on VM
       run: |
-        rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }}" ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }}:/var/www/myapp/dist/
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'rm -rf /var/www/myapp/dist'
+
+    - name: Copy files to VM using rsync
+      run: |
+        rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key" ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }}:/var/www/myapp/dist/
     
-    # Alternative option: Using scp with tar (optional if rsync is unavailable)
-    - name: Compress dist directory (with tar fixes)
-      run: |
-        tar --no-same-owner --no-same-permissions -czf dist.tar.gz ./dist/
-
-    - name: Upload dist to VM (if rsync is not used)
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.VM_IP }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: ./dist.tar.gz
-        target: /var/www/myapp/
-
-    - name: Extract files on VM (if scp is used)
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'tar -xzf /var/www/myapp/dist.tar.gz -C /var/www/myapp/'
-
     - name: Restart Nginx on VM
       run: |
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo systemctl restart nginx'
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo systemctl restart nginx'
+
 
 
 # name: Deploy to Azure VM
