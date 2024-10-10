@@ -1,4 +1,4 @@
-name: Deploy to Azure VM
+name: Build and Push Docker Image
 
 on:
   push:
@@ -6,43 +6,29 @@ on:
       - dev
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install dependencies and build the project
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker image
       run: |
-        npm install
-        npm run build
+        docker build -t cleowoman/mytemp:latest .
 
-    # Set up SSH key
-    - name: Set up SSH key
+    - name: Push Docker image
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-        chmod 600 ~/.ssh/deploy_key
-
-    # Clean target directory on VM
-    - name: Clean target directory on VM
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo rm -rf /var/www/myapp/dist/*'
-
-    # Copy files to VM using rsync
-    - name: Copy files to VM using rsync
-      run: |
-        rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key" ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }}:/var/www/myapp/dist/
-    
-    # Restart Nginx on VM
-    - name: Restart Nginx on VM
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo systemctl restart nginx'
-
-
-
-
+        docker push cleowoman/mytemp:latest
 
 
 # name: Deploy to Azure VM
@@ -50,47 +36,42 @@ jobs:
 # on:
 #   push:
 #     branches:
-#       - dev # Adjust the branch as needed
+#       - dev
 
 # jobs:
 #   deploy:
-#     name: Deploy React/Vite App to Azure VM
 #     runs-on: ubuntu-latest
 
 #     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v3
+#     - name: Checkout code
+#       uses: actions/checkout@v2
 
-#     - name: Set up Node.js
-#       uses: actions/setup-node@v3
-#       with:
-#         node-version: '18' # Use your desired Node.js version
-
-#     - name: Install dependencies
-#       run: npm ci
-
-#     - name: Build the project
-#       run: npm run build # Ensure this is the correct command for Vite
-
-#     - name: Upload build artifacts
-#       uses: actions/upload-artifact@v3
-#       with:
-#         name: build
-#         path: dist/ # Path to the build directory
-
-#     - name: Copy files to VM
-#       uses: appleboy/scp-action@v0.1.4
-#       with:
-#         host: ${{ secrets.VM_IP }}
-#         username: ${{ secrets.SSH_USERNAME }}
-#         key: ${{ secrets.SSH_PRIVATE_KEY }}
-#         source: ./dist/
-#         target: /var/www/myapp/ # Path on your VM
-
-#     - name: Restart application
+#     - name: Install dependencies and build the project
 #       run: |
-#         ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} << 'EOF'
-#           # Commands to restart your application
-#           cd /var/www/myapp/
-#           pm2 restart myapp || pm2 start npm --name "myapp" -- start
-#         EOF
+#         npm install
+#         npm run build
+
+#     # Set up SSH key
+#     - name: Set up SSH key
+#       run: |
+#         mkdir -p ~/.ssh
+#         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+#         chmod 600 ~/.ssh/deploy_key
+
+#     # Clean target directory on VM
+#     - name: Clean target directory on VM
+#       run: |
+#         ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo rm -rf /var/www/myapp/dist/*'
+
+#     # Copy files to VM using rsync
+#     - name: Copy files to VM using rsync
+#       run: |
+#         rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key" ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }}:/var/www/myapp/dist/
+    
+#     # Restart Nginx on VM
+#     - name: Restart Nginx on VM
+#       run: |
+#         ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo systemctl restart nginx'
+
+
+
