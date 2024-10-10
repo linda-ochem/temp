@@ -16,11 +16,11 @@ COPY . .
 # Build the application for production
 RUN npm run build
 
-# Use a lightweight web server to serve the built files
-FROM nginx:alpine
+# # Use a lightweight web server to serve the built files
+# FROM nginx:alpine
 
-# Copy the build files from the previous stage
-COPY --from=build /app/build /usr/share/nginx/html
+# # Copy the build files from the previous stage
+# COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose the port the app runs on
 EXPOSE 5173
