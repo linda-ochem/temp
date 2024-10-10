@@ -12,7 +12,7 @@ const NavBar = () => {
           <li>Solutions</li>
           <li>Features</li>
         </ul>
-        <SignInButton>Sign out</SignInButton>
+        <SignInButton>Sign in and out</SignInButton>
       </div>
     </div>
   );
