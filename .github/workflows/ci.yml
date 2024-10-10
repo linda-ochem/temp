@@ -18,9 +18,10 @@ jobs:
         npm install
         npm run build
 
-    # Store the SSH key in a file
+    # Create the .ssh directory and store the SSH key in a file
     - name: Set up SSH key
       run: |
+        mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
 
@@ -35,6 +36,7 @@ jobs:
     - name: Restart Nginx on VM
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.VM_IP }} 'sudo systemctl restart nginx'
+
 
 
 
